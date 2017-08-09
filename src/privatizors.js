@@ -2,10 +2,10 @@
     function(exports){
         (typeof Proxy.prototype === 'undefined'? Proxy.prototype={}: null);
         class Private extends Proxy{
-            constructor(object, handler){
+            constructor(object, handler={}, isPrivate=function(property){return property.startsWith('_');}){
                 super(object, Object.assign( {}, handler, {
                     get: function(target, property, reciever){
-                        if(property.startsWith("_")){
+                        if(isPrivate(property)){
                             return undefined;
                         }
                         else{
@@ -13,7 +13,7 @@
                         }
                     },
                     set: function(target, property, value, reciever){
-                        if(property.startsWith("_")){
+                        if(isPrivate(property)){
                             return false;
                         }
                         else{
@@ -27,7 +27,7 @@
                         }
                     },
                     has: function(target, property){
-                        if (property.startsWith("_")){
+                        if (isPrivate(property)){
                             return false;
                         }
                         else{
@@ -40,7 +40,7 @@
                         }
                     },
                     defineProperty: function(target, property, descriptor){
-                        if(property.startsWith("_")){
+                        if(isPrivate(property)){
                             return false;
                         }
                         else{
@@ -48,7 +48,7 @@
                         }
                     },
                     deleteProperty: function(target, property){
-                        if (property.startsWith("_")){
+                        if (isPrivate(property)){
                             return false;
                         }
                         else{
@@ -66,7 +66,15 @@
                             return handler.ownKeys(target);
                         }
                         else{
-                            return Object.keys(target).filter(function(key){return (!key.startsWith("_"))});
+                            return Object.keys(target).filter(function(key){return (!isPrivate(key))});
+                        }
+                    },
+                    getOwnPropertyDescriptor: function(target, property){
+                        if(isPrivate(property)){
+                            return undefined;
+                        }
+                        else{
+                            return ("getOwnPropertyDescriptor" in handler? handler.getOwnPropertyDescriptor(...arguments) : Object.getOwnPropertyDescriptor(target, property));
                         }
                     }
                 }))
