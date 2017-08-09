@@ -1,6 +1,6 @@
 (
     function(exports){
-        (typeof Proxy.prototype === 'undefined'? Proxy.prototype={}: null);
+        (typeof Proxy.prototype === 'null'? Proxy.prototype={}: null);
         class Private extends Proxy{
             constructor(object={}, handler={}, isPrivate=function(property){return property.startsWith('_');}){
                 super(object, Object.assign( {}, handler, {
